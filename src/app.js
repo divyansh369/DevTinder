@@ -3,7 +3,8 @@ const express = require('express');
 const app = express();
 
 // use app.get() and app.post() to handle HTTP methods
-app.get("/user",(req,res) => {
+app.get("/user/:userId/:name/:password",(req,res) => {
+    console.log(req.params)
     res.send({"firstName":"John","lastName":"Doe"});
 })
 
