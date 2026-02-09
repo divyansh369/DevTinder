@@ -2,13 +2,34 @@ const express = require('express');
 
 const app = express();
 
-app.use("/hello", (req, res) => {
-  res.send("Hello from /hello");
+// use app.get() and app.post() to handle HTTP methods
+app.get("/user",(req,res) => {
+    res.send({"firstName":"John","lastName":"Doe"});
+})
+
+app.post("/user",(req,res) => {
+    // saving user to database
+    res.send("User saved successfully 👍");
 });
 
-app.use("/", (req, res) => {
-  res.send("Listening on /");
+app.delete("/user",(req,res) => {
+    // deleting user from database
+    res.send("User deleted successfully !!!");
 });
+
+app.put("/user",(req,res) => {
+    // deleting user from database
+    res.send("User updated successfully !!!");
+});
+
+// use app.use() to handle all HTTP methods for a specific path
+app.use("/user", (req, res) => {
+  res.send("Hello from /user");
+});
+
+// app.use("/", (req, res) => {
+//   res.send("Listening on /");
+// });
 
 
 app.listen(3000, () => {
