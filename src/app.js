@@ -7,20 +7,16 @@ const app = express();
 /**   Middleware to parse JSON request bodies ie.
  *  if we do POST request to /signup with JSON data in the body, this middleware will parse
  *  that data and make it available in req.body. Without this middleware,
- *  req.body would be undefined when we try to access it in the route handler. 
+ *  req.body would be undefined when we try to access it in the route handler.
  * So, it's essential to include this middleware if we want to handle JSON data in our Express application.
-*/
-app.use(express.json()); 
-
-app.get("/user", (req, res) => {
-  res.json({ message: "Hello, User!" });
-});
+ */
+app.use(express.json());
 
 app.post("/signup", async (req, res) => {
   // create a new instance of the User model using the userObj
   console.log(req.body);
 
-  // create a new instance of the User model using the data from the request body from the api request. 
+  // create a new instance of the User model using the data from the request body from the api request.
   const user = new User(req.body);
 
   // save the user to the database
@@ -34,6 +30,35 @@ app.post("/signup", async (req, res) => {
       res.status(500).json({ message: "Error creating user" });
     });
 });
+
+// find user by email and password
+app.get("/user", async (req, res) => {
+  const userEmail = req.body.emailId;
+
+  try {
+    const user = await User.findOne({ emailId: userEmail });
+    if(!user || user.length === 0){
+      return res.status(404).json({ message: "User not found" });
+    }else{
+      res.json(user);
+    }
+  } catch (err) {
+    console.error("Error finding user:", err);
+    res.status(500).json({ message: "Error finding user" });
+  }
+});
+
+// Feed API - get /feed - get all the user from database
+app.get("/feed", async (req, res) => {
+  try {
+    const users = await User.find({});
+    res.send(users);
+  } catch (err) {
+    console.error("Error fetching users:", err);
+    res.status(500).json({ message: "Error fetching users" });
+  }  
+});
+
 
 connectDB()
   .then(() => {
