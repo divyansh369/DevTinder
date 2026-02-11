@@ -1,37 +1,47 @@
 const express = require("express");
+const User = require("./models/user"); // Import the User model
+const { connectDB } = require("./config/database"); // Import the database connection
 
 const app = express();
 
-// use app.use() to handle all HTTP methods for a specific path
-app.use(
-  "/user",
-  (req, res, next) => {
-    console.log("Response 1 !!!")
-    next();
-    res.send("Response 1 !!!");
-    console.log("Response 1 !!!");
-  },
-  (req, res,next) => {
-    console.log("Response 2 !!!");
-    next();
-    console.log("Response 2 !!!");
-  },
-  (req, res,next) => {
-    console.log("Response 3 !!!");
-    next();
-    console.log("Response 3 !!!");
-  },
-  (req, res,next) => {
-    console.log("Response 4 !!!");
-    // res.send("Response 4 !!!");
-    next();
-  },
-);
+/**   Middleware to parse JSON request bodies ie.
+ *  if we do POST request to /signup with JSON data in the body, this middleware will parse
+ *  that data and make it available in req.body. Without this middleware,
+ *  req.body would be undefined when we try to access it in the route handler. 
+ * So, it's essential to include this middleware if we want to handle JSON data in our Express application.
+*/
+app.use(express.json()); 
 
-// app.use("/", (req, res) => {
-//   res.send("Listening on /");
-// });
-
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
+app.get("/user", (req, res) => {
+  res.json({ message: "Hello, User!" });
 });
+
+app.post("/signup", async (req, res) => {
+  // create a new instance of the User model using the userObj
+  console.log(req.body);
+
+  // create a new instance of the User model using the data from the request body from the api request. 
+  const user = new User(req.body);
+
+  // save the user to the database
+  await user
+    .save()
+    .then(() => {
+      res.status(201).json({ message: "User created successfully" });
+    })
+    .catch((err) => {
+      console.error("Error creating user:", err);
+      res.status(500).json({ message: "Error creating user" });
+    });
+});
+
+connectDB()
+  .then(() => {
+    console.log("Database connected successfully !!!");
+    app.listen(3000, () => {
+      console.log("Server is running on port 3000");
+    });
+  })
+  .catch((err) => {
+    console.error("Error connecting to MongoDB:", err);
+  });
