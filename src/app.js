@@ -34,9 +34,9 @@ app.get("/user", async (req, res) => {
 
   try {
     const user = await User.findOne({ emailId: userEmail });
-    if(!user || user.length === 0){
+    if (!user || user.length === 0) {
       return res.status(404).json({ message: "User not found" });
-    }else{
+    } else {
       res.json(user);
     }
   } catch (err) {
@@ -53,13 +53,13 @@ app.get("/feed", async (req, res) => {
   } catch (err) {
     console.error("Error fetching users:", err);
     res.status(500).json({ message: "Error fetching users" });
-  }  
+  }
 });
 
 // delete the user by email
 app.delete("/user", async (req, res) => {
   const userEmail = req.body.emailId;
-  
+
   try {
     const deletedUser = await User.findOneAndDelete({ emailId: userEmail });
     if (!deletedUser) {
@@ -73,12 +73,29 @@ app.delete("/user", async (req, res) => {
 });
 
 // update the user by emailid
-app.patch("/user", async (req, res) => {
-  const emailId = req.body.emailId;
+app.patch("/user/:userId", async (req, res) => {
+  const userId = req.params?.userId;
   const updateData = req.body;
 
   try {
-    const updatedUser = await User.findOneAndUpdate({ emailId: emailId }, updateData, { returnDocument: "after", runValidators: true });
+    const ALLOWED_UPDATES = ["photoUrl","password","gender","about","skills",];
+
+    const isUpdateAllowed = Object.keys(updateData).every((k) =>
+      ALLOWED_UPDATES.includes(k),
+    );
+
+    if (!isUpdateAllowed) {
+      res.status(400).json({
+        message:
+          "Invalid updates! Only photoUrl, password, gender, about and skills can be updated.",
+      });
+    }
+
+    if(updateData?.skills.length > 10){
+      throw new Error("You can add up to 10 skills only");
+    }
+
+    const updatedUser = await User.findOneAndUpdate({ _id: userId },updateData,{returnDocument: "after",runValidators:true});
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
     }

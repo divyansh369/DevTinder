@@ -13,6 +13,7 @@
     "dotenv": "^17.2.4",
     "env": "^0.0.2",
     "express": "^5.2.1",
-    "mongoose": "^9.2.0"
+    "mongoose": "^9.2.0",
+    "validator": "^13.15.26"
   }
 }
