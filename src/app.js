@@ -13,9 +13,6 @@ const app = express();
 app.use(express.json());
 
 app.post("/signup", async (req, res) => {
-  // create a new instance of the User model using the userObj
-  console.log(req.body);
-
   // create a new instance of the User model using the data from the request body from the api request.
   const user = new User(req.body);
 
@@ -27,7 +24,7 @@ app.post("/signup", async (req, res) => {
     })
     .catch((err) => {
       console.error("Error creating user:", err);
-      res.status(500).json({ message: "Error creating user" });
+      res.status(500).json({ message: err.message });
     });
 });
 
@@ -59,6 +56,38 @@ app.get("/feed", async (req, res) => {
   }  
 });
 
+// delete the user by email
+app.delete("/user", async (req, res) => {
+  const userEmail = req.body.emailId;
+  
+  try {
+    const deletedUser = await User.findOneAndDelete({ emailId: userEmail });
+    if (!deletedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json({ message: "User deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting user:", err);
+    res.status(500).json({ message: "Error deleting user" });
+  }
+});
+
+// update the user by emailid
+app.patch("/user", async (req, res) => {
+  const emailId = req.body.emailId;
+  const updateData = req.body;
+
+  try {
+    const updatedUser = await User.findOneAndUpdate({ emailId: emailId }, updateData, { returnDocument: "after", runValidators: true });
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json(updatedUser);
+  } catch (err) {
+    console.error("Error updating user:", err);
+    res.status(500).json({ message: "UPDATE FAILED: " + err.message });
+  }
+});
 
 connectDB()
   .then(() => {
